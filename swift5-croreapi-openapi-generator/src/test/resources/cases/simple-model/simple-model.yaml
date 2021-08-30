@@ -1,0 +1,147 @@
+openapi: "3.0.1"
+info:
+  version: 0.0.1
+  title:  Simple case specification
+  description: Спецификация для тестирования простого кейса и общих доработок в кодогенераторе
+
+paths:
+  /simple-post:
+    post:
+      description: Простой post с выделенным запросом и ответом в схему
+      requestBody:
+        description: Выставляемый счет
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request'
+      responses:
+        200:
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+
+components:
+  schemas:
+    Request:
+      type: object
+      description:  Просто запрос
+      properties:
+        firstField:
+          pattern: '\d'
+          maxLength: 255
+          type: string
+        secondField:
+          type: integer
+          minimum: 100
+          maximum: 250
+        nonRequiredArrayField:
+          type: array
+          items:
+            type: string
+        requiredArrayField:
+          type: array
+          items:
+            type: string
+        nonRequiredMapField:
+          type: object
+          additionalProperties:
+            type: string
+        requiredMapField:
+          type: object
+          additionalProperties:
+            type: string
+        fourthField:
+          allOf:
+            - $ref: '#/components/schemas/SimpleComponentSchemas'
+            - description: Переопределенное описание, которое должно быть перенесено в модель
+        fifthField:
+          type: string
+          format: 'date-time'
+          description: это дата-тайм, класс по дефолту - OffsetDateTime
+        sixthField:
+          allOf:
+            - $ref: '#/components/schemas/SimpleComponentSchemas'
+            - description: |
+                Переопределенное описание с переносом строк, которое должно быть перенесено в модель
+                * Перенос строки
+                * Тест123
+      required:
+        - firstField
+        - requiredArrayField
+        - requiredMapField
+
+    Response:
+      type: object
+      description: |
+        Просто ответ Просто запрос TODO: добавить все обрабатываемые типы  open api и коллекции с required=false
+      properties:
+        firstField:
+          description: Самое обычное описание для поля
+          type: string
+          example: Самый обычный example
+        second_field:
+          description: Самое обычное описание для поля
+          type: string
+          example: Самый обычный example
+        thirdField:
+          type: integer
+          deprecated: true
+      required:
+        - firstField
+
+    Phone:
+      description: Номер телефона в формате ITU-T E.164
+      type: string
+      pattern: '[0-9]{4,15}'
+      example: '79000000000'
+
+    SimpleComponentSchemas:
+      type: object
+      deprecated: true
+      description: Обычный дискрипшен для обычного объекта
+      properties:
+        firstProp:
+          type: string
+          description: Самое обычное поле, скучнее не придумать
+        secondProp:
+          allOf:
+            - $ref: '#/components/schemas/SimpleProperty'
+            - description: Переопределенный дискрипшен, над полем не должно быть аннотации
+        phone:
+          $ref: '#/components/schemas/Phone'
+        phoneWithDescription:
+          allOf:
+            - $ref: '#/components/schemas/Phone'
+            - description: Номер телефона, использованный для регистрации
+        thirdProp:
+          type: string
+          description: |
+            Внутренний enum:
+            * a - description for value a
+            * b - description for value b
+            * c - description for value c
+          enum:
+            - a
+            - b
+            - c
+        outerEnumWithDesc:
+          allOf:
+            - $ref: '#/components/schemas/OuterEnum'
+            - description: Новое описание
+        outerEnum:
+          $ref: '#/components/schemas/OuterEnum'
+
+    OuterEnum:
+      type: integer
+      enum:
+        - 1
+        - 2
+        - 3
+      description: Описание для enum
+
+    SimpleProperty:
+      type: string
+      description: Самое обычное поле, только выделено отдельно в components/schemas
